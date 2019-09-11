@@ -1,0 +1,422 @@
+---
+title: "CS1_OmarShatrat_AliKamel"
+author: "Omar Shatrat"
+date: "September 25, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load the data}
+load("C:\\Users\\Omar S\\Downloads\\ramen.RData")
+```
+
+
+```{r 1}
+
+length(unique(ramen$Brand))
+
+```
+
+#1. 355 different brands are reviewed in the dataset. I recognize brands such as Nissin and Maruchan.
+
+```{r 2}
+library(stringi)
+library(stringr)
+
+chrTopTen <- as.character(ramen$Top.Ten)
+topTenYears <- str_sub(chrTopTen[chrTopTen != ""], stri_locate(chrTopTen[chrTopTen != ""], 
+                                                    pattern = "20", fixed = T)[,2]-2, -4)
+unique(stri_trim(topTenYears))
+
+
+
+```
+
+#2. We have Top Ten Data from 2012 - 2016
+
+```{r 3}
+
+usa <- ramen$Brand[ramen$Country == "USA"]
+unique(usa)
+
+```
+
+#3. there are 49 Ramen brands from the USA.
+
+```{r 4}
+
+ramenNum1 <- str_detect(ramen$Top.Ten, pattern = "#1") & !str_detect(ramen$Top.Ten, pattern = "#10")
+
+ramen$Brand[ramenNum1]
+
+```
+
+#4. MyKuali and Prima Taste have both won #1 multiple times. 
+
+
+```{r 5}
+
+country_rating <- data.frame(ramen)
+
+
+avg_ratings <- data.frame(ramen_brand = unique(ramen$Brand), avg_rating = NA)
+
+
+for(i in avg_ratings$ramen_brand){avg_ratings[avg_ratings$ramen_brand == i, "avg_rating"] <- 
+  
+  mean(country_rating[country_rating$Brand == i, "Stars"], na.rm = T)
+}
+
+cat("Maximum Average Rating:\t")
+max(avg_ratings$avg_rating)
+
+cat("\n")
+
+cat("Brands With Maximum Average Rating:\n\n")
+fiveStar <- avg_ratings[avg_ratings$avg_rating == "5", "ramen_brand"]
+fiveStar
+
+
+```
+
+#5. There are 24 brands that have the highest average rating of 5 stars.
+
+
+```{r 6}
+plot(ramen$Country, ramen$Style)
+
+```
+
+#6. From the plot, we notice that packaging proportions for countries do not vary by significant amounts. There are a few countries which rely more heavily on certain packaging types, but for the most part, the distribution is similar.
+
+
+```{r 7}
+
+cat("USA Min, Max, Avg.\n")
+
+ratingsUSA <- ramen$Stars[ramen$Country == "USA"]
+
+min(ratingsUSA)
+max(ratingsUSA)
+mean(ratingsUSA)
+
+cat("\n")
+cat("Singapore Min, Max, Avg.\n")
+
+ratingsSingapore <- ramen$Stars[ramen$Country == "Singapore"]
+
+min(ratingsSingapore)
+max(ratingsSingapore)
+mean(ratingsSingapore)
+
+cat("\n")
+cat("Top Ten Appearances\n")
+
+topTenUSA <- ramen$Top.Ten[ramen$Country == "USA"]
+countTopTenUSA <- str_count(topTenUSA, pattern = "201")
+cat("USA") 
+sum(countTopTenUSA)
+
+topTenSingapore <- ramen$Top.Ten[ramen$Country == "Singapore"]
+countTopTenSingapore <- str_count(topTenSingapore, pattern = "201")
+cat("Singapore")
+sum(countTopTenSingapore)
+
+
+
+
+```
+
+#7. The minimum, maximum, and average ratings respectively for the US are 0, 5, and 3.46 stars.
+
+#The minimum, maximum, and average ratings respectively for Singapore are 2, 5, and 4.13 stars.
+
+#I expect Singapore to be in the Top Ten more often because they have a higher average and a higher minimum rating.
+
+#I am correct because Singapore appears 7 times in the Top Ten while the US only appears once.
+
+
+
+```{r 8}
+
+cat("Production by Country:\n")
+cat("\n")
+
+summary(ramen$Country)
+
+cat("\n")
+
+mostProduction <- which.max(summary(ramen$Country))
+cat("Country with Largest Production:\n")
+mostProduction
+
+cat("\n")
+cat("Country that made the Top 10 most frequently:\n ")
+
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+countryTopTen <- ramen$Country[str_detect(ramen$Top.Ten, pattern = "#")]
+Mode(countryTopTen)
+
+cat("\n")
+cat("Number of times said country made the Top 10:\n")
+#Finds the number of times the Country Made the Top Ten
+numTimesTopTen <- table(ramen$Country[str_detect(ramen$Top.Ten, pattern = "#")])
+maxNumTimesTopTen <- max(numTimesTopTen)
+maxNumTimesTopTen
+
+
+```
+
+#8. The country that makes the most ramen is Japan. There are index number 19 in the table and appeared 352 times, the most of any country.
+
+#We defined best as which country's ramen appeared in the Top Ten the most. We feel that this is better than taking the average rating because the average is more a measure of consistency. Finding the number of Top Ten appearances shows ramen ratings for countries at their peak.
+
+#Singapore makes the best ramen. They appeared in the Top Ten more times than any other country (7)
+
+
+```{r 9}
+variety <- as.character(ramen$Variety)
+spicy <- str_detect(variety, "spicy") | str_detect(variety, "Spicy")
+
+spicyLen <- length(spicy[spicy == "TRUE"])
+notSpicyLen <- length(spicy[spicy == "FALSE"])
+
+cat("Total Spicy Ramen:\t")
+spicyLen
+cat("Total Non-Spicy Ramen\t")
+notSpicyLen
+
+cat("\n")
+
+cat("Mean rating for spicy ramen:\t")
+mean(ramen$Stars[spicy == "TRUE"])
+cat("Mean rating for non-spicy ramen:\t")
+mean(ramen$Stars[spicy == "FALSE"], na.rm = "TRUE")
+
+
+plot(spicy, ramen$Stars)
+
+
+```
+
+#9. 270 types of Ramen are considered spicy. The average rating for spicy ramen is 3.69 stars while the average rating for non-spicy ramen is 3.65 stars. The plot shows non-spicy ramen to be more closely clustered within the 3-4 star range while spicy ramen tends to be distribued more equally accross the rating spectrum. Spicy ramen does not tend to be rated much higher than non-spicy ramen.
+
+
+```{r 10}
+plot(ramen$perc_salt, ramen$Stars)
+
+
+```
+
+#10. As the salt content goes up, the ramen ratings tend to increase.
+
+```{r 11}
+
+plot(ramen$Style, ramen$perc_salt)
+
+plot(ramen$Country, ramen$perc_salt)
+
+plot(ramen$Brand, ramen$perc_salt)
+
+plot(ramen$Variety, ramen$perc_salt)
+
+
+```
+
+#11. Style has nearly no affect on the salt content present in ramen. There are many outliers for Bowl, Cup, and Pack, but the boxplots are nearly identical in terms of their median and quartiles.
+
+#A ramen's country does not appear to have a huge effect on its salt content. Similar to Style, there are many outliers but the overwhelming proportion of salt is similar accross all countries.
+
+#Most Ramen brands use large amounts of salt. There is relatively low variance.
+
+#Despite the type or flavor of ramen you choose, there is likely a high salt content. 
+
+
+```{r 12}
+
+cat("0 to 5%\n\n")
+
+length(ramen$perc_salt[ramen$perc_salt <= 5])
+mean(ramen$Stars[ramen$perc_salt <= 5], na.rm = TRUE)
+zeroToFiveCountry <- ramen$Country[ramen$perc_salt <= 5]
+which.max(summary(zeroToFiveCountry))
+max(table(zeroToFiveCountry))
+
+cat("\n")
+cat("5 to 10%\n\n")
+
+length(ramen$perc_salt[ramen$perc_salt <= 10 & ramen$perc_salt >= 5])
+mean(ramen$Stars[ramen$perc_salt <= 10 & ramen$perc_salt >= 5], na.rm = TRUE)
+fiveToTenCountry <- ramen$Country[ramen$perc_salt <= 10 & ramen$perc_salt >= 5]
+which.max(summary(fiveToTenCountry))
+max(table(fiveToTenCountry))
+
+cat("\n")
+cat("10 to 15%\n\n")
+
+length(ramen$perc_salt[ramen$perc_salt <= 15 & ramen$perc_salt >= 10])
+mean(ramen$Stars[ramen$perc_salt <= 15 & ramen$perc_salt >= 10], na.rm = TRUE)
+tenToFifteenCountry <- ramen$Country[ramen$perc_salt <= 15 & ramen$perc_salt >= 10]
+which.max(summary(tenToFifteenCountry))
+max(table(tenToFifteenCountry))
+
+cat("\n")
+cat("15 to 20%\n\n")
+
+length(ramen$perc_salt[ramen$perc_salt <= 20 & ramen$perc_salt >= 15])
+mean(ramen$Stars[ramen$perc_salt <= 20 & ramen$perc_salt >= 15], na.rm = TRUE)
+fifteenToTwentyCountry <- ramen$Country[ramen$perc_salt <= 20 & ramen$perc_salt >= 15]
+which.max(summary(fifteenToTwentyCountry))
+max(table(fifteenToTwentyCountry))
+
+cat("\n")
+cat("20-inf%\n\n")
+
+length(ramen$perc_salt[ramen$perc_salt >= 20])
+mean(ramen$Stars[ramen$perc_salt >= 20], na.rm = TRUE)
+twentyAndAboveCountry <- ramen$Country[ramen$perc_salt >= 20]
+which.max(summary(twentyAndAboveCountry))
+max(table(twentyAndAboveCountry))
+
+
+
+```
+
+#12. We decided to seperate ramen based off of its salt content. Our intervals are 0-5%, 5-10%, 10-15%, 15-20%, and 20-inf%.
+
+#There are 5 ramens with a salt content under 5%. The average rating was 0 stars. South Korea produced the largest quantity of these ramen (2/5).
+
+#There are 43 ramen with a salt content between 5 and 10%. The average rating was .175 stars. China produced the largest quantity of these ramen (10/43).
+
+#There are 73 ramen with a salt content between 10 and 15%. The average rating was 1.21 stars. Taiwan produced the largest quantity of these ramen (13/73).
+
+#There are 1677 ramen with a salt content between 15 and 20%. The average rating was 3.81 stars, Japan produced the largest quantity of these ramen (238/1677).
+
+#There are 783 ramen with a salt content above 20%. The average rating was 3.76 stars. Japan produced the largest quantity of these ramen (105/783).
+
+#From this we can get a general overview of the ramen market. Most ramen seems to be produced by Asian countries, with Japan shouldering the biggest load. There are very few ramen with a salt content below 15%, and they all tend to receive horrible ratings. The large majority of ramen contain above 15% of salt; their ratings are dramatically higher. It is as though high salt is a prerequisite for receiving high ratings. After that, more variables such as flavor and taste come into play.
+
+
+```{r 13}
+
+cat("Mean Star Rating for Ramen in Top 10:\t")
+mean(ramen$Stars[str_detect(ramen$Top.Ten, pattern = "#")])
+cat("Min Star Rating for Ramen in Top 10:\t")
+min(ramen$Stars[str_detect(ramen$Top.Ten, pattern = "#")])
+plot(str_detect(ramen$Top.Ten, pattern = "#"), ramen$perc_salt)
+
+cat("Mean Rating for Japanese Ramen:\t")
+mean(ramen$Stars[ramen$Country == "Japan"])
+cat("Mean Rating for Singaporean Ramen")
+mean(ramen$Stars[ramen$Country == "Singapore"])
+
+cat("\n")
+
+curry <- str_detect(variety, "curry") | str_detect(variety, "Curry")
+curryLen <- length(curry[curry == "TRUE"])
+cat("Total Ramen Containing Curry:\t")
+curryLen
+notCurryLen <- length(curry[curry == "FALSE"])
+cat("Total Ramen Not Containing Curry:\t")
+notCurryLen
+cat("Mean Rating for Ramen Containing Curry:\t")
+mean(ramen$Stars[curry == "TRUE"])
+cat("Mean Rating for Ramen Not Containing Curry:\t")
+mean(ramen$Stars[curry == "FALSE"], na.rm = "TRUE")
+
+cat("\n")
+
+chicken <- str_detect(variety, "chicken") | str_detect(variety, "Chicken")
+chickenLen <- length(chicken[chicken == "TRUE"])
+cat("Total Ramen Containing Chicken:\t")
+chickenLen
+notChickenLen <- length(chicken[chicken == "FALSE"])
+cat("Total Ramen Not Containing Chicken:\t")
+notChickenLen
+cat("Mean Rating for Ramen Containing Chicken:\t")
+mean(ramen$Stars[chicken == "TRUE"])
+cat("Mean Rating for Ramen Not Containing Chicken:\t")
+mean(ramen$Stars[chicken == "FALSE"], na.rm = "TRUE")
+
+cat("\n")
+
+beef <- str_detect(variety, "beef") | str_detect(variety, "Beef")
+beefLen <- length(beef[beef == "TRUE"])
+cat("Total Ramen Containing Beef:\t")
+beefLen
+notBeefLen <- length(chicken[chicken == "FALSE"])
+cat("Total Ramen Not Containing Beef:\t")
+notBeefLen
+cat("Mean Rating for Ramen Containing Beef:\t")
+mean(ramen$Stars[beef == "TRUE"])
+cat("Mean Rating for Ramen Not Containing Beef:\t")
+mean(ramen$Stars[beef == "FALSE"], na.rm = "TRUE")
+
+cat("\n")
+
+vegetable <- str_detect(variety, "vegetable") | str_detect(variety, "Vegetable")
+vegetableLen <- length(vegetable[vegetable == "TRUE"])
+cat("Total Ramen Containing Vegetables:\t")
+vegetableLen
+notVegetableLen <- length(vegetable[vegetable == "FALSE"])
+cat("Total Ramen Not Containing Vegetables:\t")
+notVegetableLen
+cat("Mean Rating for Ramen Containing Vegetables:\t")
+mean(ramen$Stars[vegetable == "TRUE"])
+cat("Mean Rating for Ramen Not Containing Vegetables:\t")
+mean(ramen$Stars[vegetable == "FALSE"], na.rm = "TRUE")
+
+cat("\n\n")
+
+cat("Number of Times Keyword Shows Up in Top 10:\n\n")
+
+cat("Curry:\n")
+table(curry[str_detect(ramen$Top.Ten, "#")])
+cat("\n")
+cat("Spicy:\n")
+table(spicy[str_detect(ramen$Top.Ten, "#")])
+cat("\n")
+cat("Chicken:\n")
+table(chicken[str_detect(ramen$Top.Ten, "#")])
+cat("\n")
+cat("Beef:\n")
+table(beef[str_detect(ramen$Top.Ten, "#")])
+cat("\n")
+cat("Vegetable:\n")
+table(vegetable[str_detect(ramen$Top.Ten, "#")])
+
+cat("\n")
+
+lowFat <- str_detect(variety, "Low")
+lowFatLen <- length(lowFat[lowFat == "TRUE"])
+cat("Number of Ramen That Are Low Fat:\t")
+lowFatLen
+cat("Mean Rating for Low Fat Ramen:\t")
+mean(ramen$Stars[lowFat == "TRUE"])
+
+
+```
+
+
+#13. Because of our results for #10, we strongly recommend that Roamin' Ramen uses a high amount of salt to maximize their chances of getting a favorable rating. Our plot shows that every single Top Ten winner has used a salt percentage above 15. 
+
+#Among 37 Top Ten winners, the minimum rating was 4 stars. The average was 4.91 stars.
+
+#We also recommend for Roamin' Ramen to base their operations out of Singapore or possibly shadow Singaporean brands in order to observe why they score in the Top Ten so frequently. The average rating for a Singaporean ramen was 4.12 stars. Keep in mind that no rating under 4 stars made the top ten and the overwhelming majority of ratings that did were rated much higher than just 4 stars. Japan, the country with the highest level of ramen production, averaged a rating of just under 4 stars.
+
+#We recommend for Roamin' Ramen to make their ramen curry-flavored, or at least put "curry" in the title. Out of 126 ramens containing the phrase "curry", the average rating was 4.13 stars. The counter-average (average for ramens not containing the phrase "curry") was 3.63 stars.
+
+#Upon further analysis, we recommend for Roamin Ramen to not use the terms "chicken", "beef", or "vegetable" when describing their ramen, as these ramens have an average rating lower than their counter-average rating. Among 328 ramens containing the phrase "chicken", the average rating was 3.4 stars. For beef, it was 3.51 stars. For vegetable, it was 3.3 stars. The respective counter-averages were 3.7, 3.67, and 3.66 stars. 
+
+#It should be noted that among the 37 ramens that did make the Top Ten, 6 contained the phrase "curry". 2 contained "spicy", 4 contained "chicken", 1 contained "beef", and 0 contained "vegetable". It clearly seems as though ramen curries are more favorable when it comes to rankings.
+
+#Our final recommendation for Roamin' Ramen is to avoid taking the healthy route. Among the 4 ramens that were described as "Low Fat", the average rating was 2.19 stars. Roamin' Ramen should focus more on flavor in order to make the Top 10.
+
+#END
