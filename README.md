@@ -1,3 +1,3 @@
-# BSDS-100-Case-Studies
+# Data-Science-Case-Studies
 
 Assortment of case studies centered around product analytics and sports.
